@@ -20,7 +20,7 @@ class Game:
         """Play the game."""
         while not self.board.game_ended:
             player = self.players[self.board.current_player]
-            possible_moves = possible_game_moves(self.board, player)
+            possible_moves = possible_game_moves(self.board, player.name)
             move = player.choose_move(possible_moves, self.board)
             self.board = move.play()
             if self.board.etape_ended:
