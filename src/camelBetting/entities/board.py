@@ -53,7 +53,7 @@ class Board:
         raise ValueError('Camel not found on the field.')
 
     @property
-    def current_order(self) -> Tuple[str]:
+    def current_camel_order(self) -> Tuple[str]:
         """Current order of the camels.
 
         Returns:
@@ -64,6 +64,17 @@ class Board:
             position = self.get_camel_position(camel)
             positions.append((position[0], position[1], camel))
         return tuple([x[2] for x in sorted(positions, key=lambda x: (-x[0], -x[1]))])
+
+    @property
+    def current_player_order(self) -> Tuple[Tuple[str, int]]:
+        """Current order of the players.
+
+        Returns:
+            tuple of player names in the current order
+        """
+        players = [(player_name, player_bank) for player_name, player_bank in self.player_banks.items()]
+        players = tuple(sorted(players, key=lambda x: x[1], reverse=True))
+        return players
 
     @property
     def etape_ended(self) -> bool:
@@ -77,7 +88,7 @@ class Board:
 
     def reset_etape(self):
         """End the etape."""
-        order = self.current_order
+        order = self.current_camel_order
         self.camels_to_roll = [camel for camel in CAMELS]
         self.available_etape_bets = {camel: [EtapeBet(camel, value) for value in ETAPE_BET_VALUES] for camel in CAMELS}
         for player in self.player_banks.keys():
@@ -89,7 +100,7 @@ class Board:
 
     def cash_is_overalls(self):
         """Cash in the overall bets."""
-        order = self.current_order
+        order = self.current_camel_order
         bet_queues = [self.losing_bets, self.winning_bets]
         for bet_queue in bet_queues:
             for bet in bet_queue:
@@ -120,4 +131,4 @@ class Board:
         return new_board
 
     def __repr__(self):
-        return f'Current order: ({self.current_order})'
+        return f'Current order: ({self.current_camel_order})'
