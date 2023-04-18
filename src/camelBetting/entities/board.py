@@ -5,14 +5,13 @@ from camelBetting.entities.stone import Stone
 from typing import List, Tuple, Union, Dict
 from copy import copy
 
-
 CAMELS = ['yellow', 'blue', 'green', 'orange', 'white']
 
 
 class Board:
     """Board class."""
 
-    def __init__(self, player_names: List[str]):
+    def __init__(self, player_names: List[str], simulation: bool = False):
         """Board constructor.
 
         Args:
@@ -37,7 +36,7 @@ class Board:
             {player_name: [camel for camel in CAMELS] for player_name in player_names}
         self._current_player_index = -1
 
-        self.reset_etape()
+        self.reset_etape(simulation)
 
     @property
     def current_player(self) -> str:
@@ -122,17 +121,19 @@ class Board:
         """Whether the game has ended."""
         return any([f > 16 for camel, (f, i) in self.camel_positions.items()])
 
-    def reset_etape(self):
+    def reset_etape(self, simulation: bool = False):
         """End the etape."""
         order = self.current_camel_order
         self.camels_to_roll = [camel for camel in CAMELS]
-        self.available_etape_bets = {camel: [EtapeBet(camel, value) for value in ETAPE_BET_VALUES] for camel in CAMELS}
-        for player in self.player_banks.keys():
-            for etape_bet in self.player_etape_bets[player]:
-                to_cash_in = etape_bet.cash_in(order)
-                print(f'Player {player} cashed in {to_cash_in} for {etape_bet}')
-                self.player_banks[player] += to_cash_in
-            self.player_etape_bets[player] = []
+        if not simulation:
+            self.available_etape_bets = {camel:
+                                             [EtapeBet(camel, value) for value in ETAPE_BET_VALUES] for camel in CAMELS}
+            for player in self.player_banks.keys():
+                for etape_bet in self.player_etape_bets[player]:
+                    to_cash_in = etape_bet.cash_in(order)
+                    print(f'Player {player} cashed in {to_cash_in} for {etape_bet}')
+                    self.player_banks[player] += to_cash_in
+                self.player_etape_bets[player] = []
 
         self.etape += 1
         self.etape_starter += 1
@@ -164,7 +165,7 @@ class Board:
         Returns:
             copy of the board
         """
-        new_board = Board(list(self.player_banks.keys()))
+        new_board = Board(list(self.player_banks.keys()), simulation)
         new_board.camels_to_roll = copy(self.camels_to_roll)
         new_board.stones = {i: copy(stone) for i, stone in self.stones.items()}
         new_board.camel_positions = copy(self.camel_positions)
