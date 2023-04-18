@@ -40,6 +40,7 @@ class Simulation:
         return outcomes
 
     def approximate_game(self, number_of_approximations: int) -> Dict[Tuple[str], int]:
+        block_stdout()
         outcomes = defaultdict(int)
         for i in range(number_of_approximations):
             board = self.init_board.copy()
@@ -50,7 +51,7 @@ class Simulation:
                 if board.etape_ended:
                     board.reset_etape(simulation=True)
             outcomes[board.current_camel_order] += 1
-
+        enable_stdout()
         return outcomes
 
     def _simulate_etape(self, board: Board, outcomes: Dict[Tuple[str], int]) -> Dict[Tuple[str], int]:

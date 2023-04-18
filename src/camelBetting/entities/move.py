@@ -247,7 +247,7 @@ class BetOverall(Move):
         else:
             bets_placed = len(self.board.losing_bets)
             place = -1
-        if bets_placed > len(OVERALL_BET_VALUES):
+        if bets_placed >= len(OVERALL_BET_VALUES):
             minimal_value = 1
         else:
             minimal_value = OVERALL_BET_VALUES[bets_placed]
