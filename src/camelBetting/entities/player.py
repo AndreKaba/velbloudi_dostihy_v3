@@ -15,7 +15,7 @@ class Player:
         """Player constructor."""
         self.name = name
 
-    def realize_move(self, moves: List[Move], board: Board) -> Move:
+    def choose_move(self, moves: List[Move], board: Board) -> Move:
         """Choose a move from the list of possible moves.
 
         Args:
@@ -71,7 +71,7 @@ class EvilNpc(BasicNpc):
         self.threshold_for_overall_bets = threshold_for_overall_bets
         self.game_approx_number = game_approx_number
 
-    def realize_move(self, moves: List[Move], board: Board) -> Move:
+    def choose_move(self, moves: List[Move], board: Board) -> Move:
         """Chooses to place a stone or best EV move in current situation.
 
         Args:
@@ -107,7 +107,7 @@ class RandomNpc(BasicNpc):
         super().__init__(name)
         self.threshold_for_overall_bets = threshold_for_overall_bets
 
-    def realize_move(self, moves: List[Move], board: Board) -> Move:
+    def choose_move(self, moves: List[Move], board: Board) -> Move:
         """Chooses a random move apart from stone placing.
 
         Args:
