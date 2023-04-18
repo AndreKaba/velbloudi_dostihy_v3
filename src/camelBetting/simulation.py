@@ -22,7 +22,7 @@ class Simulation:
         self.etape_limit = None
 
     def simulate_etape(self) -> Dict[Tuple[str], int]:
-        board = self.init_board
+        board = self.init_board.copy()
         outcomes = defaultdict(int)
         block_stdout()
         self._simulate_etape(board, outcomes)
@@ -31,7 +31,7 @@ class Simulation:
 
     def simulate_game(self, etape_limit: int) -> Dict[Tuple[str], int]:
         self.etape_limit = self.init_board.etape + etape_limit
-        board = self.init_board
+        board = self.init_board.copy()
         outcomes = defaultdict(int)
         block_stdout()
         self._simulate_game(board, outcomes)
@@ -41,7 +41,7 @@ class Simulation:
     def approximate_game(self, number_of_approximations: int) -> Dict[Tuple[str], int]:
         outcomes = defaultdict(int)
         for i in range(number_of_approximations):
-            board = self.init_board
+            board = self.init_board.copy()
             while not board.game_ended:
                 possible_moves = simulation_moves(board)
                 move = random.choice(possible_moves)
