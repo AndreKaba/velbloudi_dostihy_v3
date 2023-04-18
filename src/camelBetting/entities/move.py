@@ -48,6 +48,10 @@ class Move:
         self._realize_move()
         return self.board
 
+    @property
+    def shortcut(self) -> str:
+        raise NotImplementedError()
+
 
 class DiceRoll(Move):
     """Dice roll move."""
@@ -111,6 +115,12 @@ class DiceRoll(Move):
     def __repr__(self):
         return f'{self.player} rolled {self.dice} for {self.camel.upper()}'
 
+    @property
+    def shortcut(self) -> str:
+        if self.is_random:
+            return 'r'
+        return f'r{self.camel.lower()[0]}{self.dice}'
+
 
 class StonePut(Move):
     """Stone put move."""
@@ -153,6 +163,10 @@ class StonePut(Move):
     def __repr__(self):
         return f'{self.player} put stone on field {self.field_position} with value {"+1" if self.positive else "-1"}'
 
+    @property
+    def shortcut(self) -> str:
+        return f's{"p" if self.positive else "m"}{self.field_position}'
+
 
 class BetEtapeWinner(Move):
 
@@ -186,6 +200,10 @@ class BetEtapeWinner(Move):
         bet = self.board.available_etape_bets[self.camel].pop(0)
         self.board.player_etape_bets[self.player].append(bet)
 
+    @property
+    def shortcut(self) -> str:
+        return f'e{self.camel.lower()[0]}'
+
 
 class BetOverall(Move):
 
@@ -216,4 +234,8 @@ class BetOverall(Move):
             return f'{self.player} bet on overall winner.'
         else:
             return f'{self.player} bet on overall loser.'
+
+    @property
+    def shortcut(self) -> str:
+        return f'o{self.camel.lower()[0]}{"w" if self.winner else "l"}'
 
