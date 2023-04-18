@@ -33,7 +33,7 @@ class Board:
         self.player_etape_bets = {player_name: [] for player_name in player_names}
         self.player_camel_cards = {player_name: [camel for camel in CAMELS] for player_name in player_names}
 
-        self.end_etape()
+        self.reset_etape()
 
     def get_camel_position(self, camel: str) -> Tuple[int, int]:
         """Return the position of a camel on the field.
@@ -73,7 +73,7 @@ class Board:
         """Whether the game has ended."""
         return any([len(field) > 0 for i, field in self.fields.items() if i > 16])
 
-    def end_etape(self):
+    def reset_etape(self):
         """End the etape."""
         order = self.current_order
         self.camels_to_roll = [camel for camel in CAMELS]
