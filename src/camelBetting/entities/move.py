@@ -46,6 +46,7 @@ class Move:
         """
         self.board = self.board.copy()
         self._realize_move()
+        self.board.next_player()
         return self.board
 
     @property

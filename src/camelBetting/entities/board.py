@@ -18,6 +18,8 @@ class Board:
         Args:
             player_names: list of player names
         """
+        self.etape = 0  # etape number
+        self.etape_starter = 0  # player who starts the etape
         # init dice and etape bets
         self.camels_to_roll: List[str] = []  # list of camels that have not rolled yet
         self.available_etape_bets: Dict[str, List[EtapeBet]] = {}  # available etape bets for each camel
@@ -29,12 +31,28 @@ class Board:
         self.fields: Dict[int, List[str]] = {i: [] for i in range(1, 20)}
         self.fields[0] = [camel for camel in CAMELS]
         # init the player banks
+        self.players = player_names
         self.player_banks: Dict[str, int] = {player_name: 0 for player_name in player_names}
         self.player_etape_bets: Dict[str, List[EtapeBet]] = {player_name: [] for player_name in player_names}
         self.player_camel_cards: Dict[str, List[str]] = \
             {player_name: [camel for camel in CAMELS] for player_name in player_names}
+        self._current_player_index = 0
 
         self.reset_etape()
+
+    @property
+    def current_player(self) -> str:
+        """Get the players whose turn it is.
+
+        Returns:
+            name of the current player
+        """
+        return self.players[self._current_player_index]
+
+    def next_player(self) -> None:
+        """Move to the next player."""
+        self._current_player_index += 1
+        self._current_player_index %= len(self.players)
 
     def get_camel_position(self, camel: str) -> Tuple[int, int]:
         """Return the position of a camel on the field.
@@ -96,6 +114,11 @@ class Board:
                 print(f'Player {player} cashed in {to_cash_in} for {etape_bet}')
                 self.player_banks[player] += to_cash_in
             self.player_etape_bets[player] = []
+
+        self.etape += 1
+        self.etape_starter += 1
+        self.etape_starter %= len(self.players)
+        self._current_player_index = self.etape_starter
 
     def cash_is_overalls(self):
         """Cash in the overall bets."""

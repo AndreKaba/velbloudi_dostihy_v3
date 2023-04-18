@@ -12,8 +12,7 @@ class Game:
     """The Game class."""
 
     def __init__(self, players: List[Player]):
-        self.etape = 1
-        self.board = Board()
+        self.board = Board([player.name for player in players])
 
         pass
 
