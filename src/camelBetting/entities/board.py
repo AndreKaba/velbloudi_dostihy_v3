@@ -1,5 +1,5 @@
 """Module containing the definition of the Board class."""
-from camelBetting.entities.bet import EtapeBet, OverallBet, overall_bet_values
+from camelBetting.entities.bet import EtapeBet, OverallBet, overall_bet_values, ETAPE_BET_VALUES
 from camelBetting.entities.stone import Stone
 
 from typing import List, Tuple, Union, Dict
@@ -7,7 +7,6 @@ from copy import copy
 
 
 CAMELS = ['yellow', 'blue', 'green', 'orange', 'white']
-ETAPE_BET_VALUES = [5, 3, 2]
 
 
 class Board:

@@ -2,6 +2,7 @@
 from typing import Tuple, Generator
 
 OVERALL_BET_VALUES = [8, 5, 3, 2]
+ETAPE_BET_VALUES = [5, 3, 2]
 
 
 class EtapeBet:
