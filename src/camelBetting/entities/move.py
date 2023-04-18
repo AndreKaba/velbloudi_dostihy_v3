@@ -101,6 +101,7 @@ class DiceRoll(Move):
         if not self.available:
             raise MoveNotAvailable()
         self.board.camels_to_roll.pop(self.board.camels_to_roll.index(self.camel))
+        self.board.player_banks[self.player] += 1
         field, index = self.board.camel_positions[self.camel]
         new_field = field + self.dice
         travelling_party = [(self.camel, field, index)]
@@ -258,7 +259,7 @@ class BetOverall(Move):
     def _realize_move(self) -> None:
         if not self.available:
             raise MoveNotAvailable()
-        self.board.player_camel_cards[self.camel].pop(self.board.player_camel_cards[self.player].index(self.camel))
+        self.board.player_camel_cards[self.player].pop(self.board.player_camel_cards[self.player].index(self.camel))
         bet = OverallBet(self.camel, self.player)
         if self.winner:
             self.board.winning_bets.append(bet)
