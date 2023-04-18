@@ -3,7 +3,7 @@ from camelBetting.entities.board import Board
 from camelBetting.entities.stone import Stone
 from camelBetting.entities.bet import OverallBet
 
-from typing import Union, Dict, Tuple
+from typing import Union, Dict, Tuple, List
 import random
 
 
@@ -44,13 +44,16 @@ class Move:
         """Realize the move."""
         raise NotImplementedError()
 
-    def play(self) -> Board:
+    def play(self, simulation: bool = False) -> Board:
         """Play the move.
+
+        Args:
+            simulation: whether the move is being played in a simulation
 
         Returns:
             board after the move is played
         """
-        self.board = self.board.copy()
+        self.board = self.board.copy(simulation=simulation)
         self._realize_move()
         self.board.next_player()
         return self.board
@@ -245,4 +248,14 @@ class BetOverall(Move):
     @property
     def shortcut(self) -> str:
         return f'o{self.camel.lower()[0]}{"w" if self.winner else "l"}'
+
+
+def simulation_moves(board: Board) -> List[Move]:
+    moves = []
+    player = board.current_player
+    for camel in board.camels_to_roll:
+        for i in [1, 2, 3]:
+            moves.append(DiceRoll(board, player, camel, i))
+
+    return moves
 

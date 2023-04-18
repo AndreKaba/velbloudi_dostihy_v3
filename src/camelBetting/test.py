@@ -1,6 +1,9 @@
 """Module containing various tests for the game entities."""
 from camelBetting.entities.board import Board
 from camelBetting.entities.move import DiceRoll, StonePut
+from camelBetting.simulation import Simulation
+
+import cProfile
 
 
 def test_board_moves():
@@ -20,8 +23,17 @@ def test_board_moves():
     print(board)
 
 
+def test_simulation():
+    board = Board(['a', 'b'])
+    simulation = Simulation(board)
+    outcomes = simulation.simulate_etape()
+    print(outcomes)
+
+
 def main():
-    test_board_moves()
+    # test_board_moves()
+    # test_simulation()
+    cProfile.run('test_simulation()')
 
 
 if __name__ == '__main__':
