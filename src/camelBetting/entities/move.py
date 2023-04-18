@@ -12,6 +12,10 @@ class MoveNotAvailable(Exception):
     pass
 
 
+class NotPlayersTurn(Exception):
+    pass
+
+
 class Move:
     """Base Move class to inherit from."""
 
@@ -24,6 +28,8 @@ class Move:
         """
         self.board = board
         self.player = player
+        if self.board.current_player != self.player:
+            raise NotPlayersTurn()
 
     def expected_value(self, outcomes: Dict[Tuple[str], int]) -> float:
         """Expected value of the move."""
