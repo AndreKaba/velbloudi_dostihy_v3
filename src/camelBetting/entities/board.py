@@ -1,5 +1,5 @@
 """Module containing the definition of the Board class."""
-from camelBetting.entities.bet import EtapeBet, OverallBet
+from camelBetting.entities.bet import EtapeBet, OverallBet, overall_bet_values
 from camelBetting.entities.stone import Stone
 
 from typing import List, Tuple, Union, Dict
@@ -86,6 +86,21 @@ class Board:
                 print(f'Player {player} cashed in {to_cash_in} for {etape_bet}')
                 self.player_banks[player] += to_cash_in
             self.player_etape_bets[player] = []
+
+    def cash_is_overalls(self):
+        """Cash in the overall bets."""
+        order = self.current_order
+        bet_queues = [self.losing_bets, self.winning_bets]
+        for bet_queue in bet_queues:
+            for bet in bet_queue:
+                bet_values = overall_bet_values()
+                if bet.camel == order[0]:
+                    value = next(bet_values)
+                    print(f'Player {bet.player} won {value} for {bet}')
+                    self.player_banks[bet.player] += value
+                else:
+                    print(f'Player {bet.player} lost {bet} (-1)')
+                    self.player_banks[bet.player] += -1
 
     def copy(self):
         """Get a copy of the board.

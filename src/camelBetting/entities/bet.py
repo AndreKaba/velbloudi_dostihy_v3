@@ -1,5 +1,7 @@
 """Module containing the bets."""
-from typing import Tuple
+from typing import Tuple, Generator
+
+OVERALL_BET_VALUES = [8, 5, 3, 2]
 
 
 class EtapeBet:
@@ -40,4 +42,18 @@ class OverallBet:
     def __init__(self, camel: str, player: str):
         self.camel = camel
         self.player = player
+
+
+def overall_bet_values() -> Generator:
+    """Generator for overall bet values.
+
+    Yields:
+        next value
+    """
+    values = [x for x in OVERALL_BET_VALUES]
+    while True:
+        if len(values) > 0:
+            yield values.pop(0)
+        else:
+            yield 1
 
