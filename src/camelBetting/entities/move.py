@@ -4,6 +4,7 @@ from camelBetting.entities.stone import Stone
 from camelBetting.entities.bet import OverallBet
 
 from typing import Union, Dict, Tuple
+import random
 
 
 class MoveNotAvailable(Exception):
@@ -63,7 +64,7 @@ class DiceRoll(Move):
             dice: the number of dice to roll
         """
         super().__init__(board, player)
-        random = camel is None or dice is None
+        self.is_random = camel is None or dice is None
         if camel is None:
             self.camel = random.choice(self.board.camels_to_roll)
         else:
