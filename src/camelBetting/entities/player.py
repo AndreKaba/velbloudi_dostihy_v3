@@ -1,7 +1,7 @@
 """Module containing various player type definitions."""
 import random
 
-from camelBetting.entities.move import Move, StonePut, BetOverall
+from camelBetting.entities.move import Move, StonePut, BetOverall, DiceRoll
 from camelBetting.simulation import Simulation
 from camelBetting.entities.board import Board
 
@@ -126,3 +126,29 @@ class RandomNpc(BasicNpc):
         return random.choice(
             [move for move in moves if not isinstance(move, StonePut) and not isinstance(move, BetOverall)]
         )
+
+
+class LessRandomNpc(RandomNpc):
+
+    def choose_move(self, moves: List[Move], board: Board) -> Move:
+        """Chooses a random move apart from stone placing.
+
+        Args:
+            moves: possible moves
+            board: current board
+
+        Returns:
+            chosen move
+        """
+        camel_pos = [x[0] for x in board.camel_positions.values()]
+        stone_move = self._place_stone(moves, board, camel_pos)
+        if stone_move is not None:
+            return stone_move
+        preselected_moves = [move for move in moves if isinstance(move, DiceRoll)]  # take dice roll as a baseline
+        preselected_moves.append(random.choice(
+            [move for move in moves if not isinstance(move, StonePut) and not isinstance(move, BetOverall)]
+        ))  # append a normal move
+        if max(camel_pos) > self.threshold_for_overall_bets:  # append an overall bet
+            preselected_moves.append(random.choice([move for move in moves if isinstance(move, BetOverall)]))
+        return random.choice(preselected_moves)
+
