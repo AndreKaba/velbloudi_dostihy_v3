@@ -22,6 +22,9 @@ class Game:
             player = self.players[self.board.current_player]
             possible_moves = possible_game_moves(self.board, player.name)
             move = player.choose_move(possible_moves, self.board)
+            print(move)
             self.board = move.play()
             if self.board.etape_ended:
+                print("ETAPE ENDED")
                 self.board.reset_etape()
+                print(f"NEXT ETAPE: {self.board.etape}")
