@@ -1,3 +1,4 @@
+"""Module containing various tests for the game entities."""
 from camelBetting.entities.board import Board
 from camelBetting.entities.move import DiceRoll, StonePut
 

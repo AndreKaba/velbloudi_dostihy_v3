@@ -1,3 +1,4 @@
+"""Module containing the definition of the Board class."""
 from camelBetting.entities.bet import EtapeBet
 
 from typing import List, Tuple, Union
@@ -9,8 +10,14 @@ ETAPE_BET_VALUES = [5, 3, 2]
 
 
 class Board:
+    """Board class."""
 
     def __init__(self, player_names: List[str]):
+        """Board constructor.
+
+        Args:
+            player_names: list of player names
+        """
         # init dice and etape bets
         self.camels_to_roll = []  # list of camels that have not rolled yet
         self.available_etape_bets = None  # available etape bets for each camel
@@ -45,6 +52,11 @@ class Board:
 
     @property
     def current_order(self) -> Tuple[str]:
+        """Current order of the camels.
+
+        Returns:
+            tuple of camel colors in the current order
+        """
         positions = []
         for camel in CAMELS:
             position = self.get_camel_position(camel)
@@ -52,6 +64,7 @@ class Board:
         return tuple([x[2] for x in sorted(positions, key=lambda x: (-x[0], -x[1]))])
 
     def end_etape(self):
+        """End the etape."""
         order = self.current_order
         self.camels_to_roll = [camel for camel in CAMELS]
         self.available_etape_bets = {camel: [EtapeBet(camel, value) for value in ETAPE_BET_VALUES] for camel in CAMELS}
@@ -63,6 +76,11 @@ class Board:
             self.player_etape_bets[player] = []
 
     def copy(self):
+        """Get a copy of the board.
+
+        Returns:
+            copy of the board
+        """
         new_board = Board(list(self.player_banks.keys()))
         new_board.camels_to_roll = copy(self.camels_to_roll)
         new_board.available_etape_bets = copy(self.available_etape_bets)

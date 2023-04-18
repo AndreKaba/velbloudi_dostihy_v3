@@ -1,3 +1,4 @@
+"""Module containing the definition of various moves."""
 from camelBetting.entities.board import Board
 from camelBetting.entities.stone import Stone
 
@@ -5,30 +6,56 @@ from typing import Union
 
 
 class Move:
+    """Base Move class to inherit from."""
 
     def __init__(self, board: Board, player: str):
+        """Move constructor.
+
+        Args:
+            board: current board
+            player: player who is making the move
+        """
         self.board = board
         self.player = player
 
     def expected_value(self) -> float:
+        """Expected value of the move."""
         raise NotImplementedError()
 
     @property
     def available(self) -> bool:
+        """Whether the move is available."""
         raise NotImplementedError()
 
     def _realize_move(self) -> None:
+        """Realize the move."""
         raise NotImplementedError()
 
     def play(self) -> Board:
+        """Play the move.
+
+        Returns:
+            board after the move is played
+        """
         self.board = self.board.copy()
         self._realize_move()
         return self.board
 
 
 class DiceRoll(Move):
+    """Dice roll move."""
 
-    def __init__(self, board: Board, player: str, camel: str = None, dice: int = None):
+    def __init__(
+            self, board: Board, player: str, camel: Union[str, None] = None, dice: Union[int, None] = None
+    ) -> None:
+        """Dice roll constructor.
+
+        Args:
+            board: the game board
+            player: the player who is making the move
+            camel: the camel to roll for
+            dice: the number of dice to roll
+        """
         super().__init__(board, player)
         random = camel is None or dice is None
         if camel is None:
@@ -77,8 +104,17 @@ class DiceRoll(Move):
 
 
 class StonePut(Move):
+    """Stone put move."""
 
     def __init__(self, board: Board, player: str, field_position: int, positive: bool):
+        """Stone put move constructor.
+
+        Args:
+            board: the game board
+            player: the player who is making the move
+            field_position: the position of the field to put the stone on
+            positive: whether the stone is positive or negative
+        """
         super().__init__(board, player)
         self.field_position = field_position
         self.positive = positive
