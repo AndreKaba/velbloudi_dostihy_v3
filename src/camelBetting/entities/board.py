@@ -135,21 +135,26 @@ class Board:
                     print(f'Player {bet.player} lost {bet} (-1)')
                     self.player_banks[bet.player] += -1
 
-    def copy(self):
+    def copy(self, simulation: bool = False):
         """Get a copy of the board.
+
+        Args:
+            simulation: whether the copy is used in a simulation
 
         Returns:
             copy of the board
         """
         new_board = Board(list(self.player_banks.keys()))
         new_board.camels_to_roll = copy(self.camels_to_roll)
-        new_board.available_etape_bets = copy(self.available_etape_bets)
-        new_board.winning_bets = copy(self.winning_bets)
-        new_board.losing_bets = copy(self.losing_bets)
-        new_board.stones = copy(self.stones)
-        new_board.fields = copy(self.fields)
-        new_board.player_banks = copy(self.player_banks)
-        new_board.player_camel_cards = copy(self.player_camel_cards)
+        new_board.stones = {i: copy(stone) for i, stone in self.stones.items()}
+        new_board.fields = {i: copy(field) for i, field in self.fields.items()}
+        if not simulation:
+            new_board.available_etape_bets = copy(self.available_etape_bets)
+            new_board.winning_bets = copy(self.winning_bets)
+            new_board.losing_bets = copy(self.losing_bets)
+            new_board.player_banks = {player_name: copy(player_bank) for player_name, player_bank
+                                      in self.player_banks.items()}
+            new_board.player_camel_cards = copy(self.player_camel_cards)
         return new_board
 
     def __repr__(self):
