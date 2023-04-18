@@ -26,7 +26,7 @@ class Board:
         self.losing_bets = []  # places overall losing bets
         # init the field
         self.stones = {i: None for i in range(1, 17)}
-        self.fields = {i: [] for i in range(1, 17)}
+        self.fields = {i: [] for i in range(1, 20)}
         self.fields[0] = [camel for camel in CAMELS]
         # init the player banks
         self.player_banks = {player_name: 0 for player_name in player_names}
@@ -62,6 +62,16 @@ class Board:
             position = self.get_camel_position(camel)
             positions.append((position[0], position[1], camel))
         return tuple([x[2] for x in sorted(positions, key=lambda x: (-x[0], -x[1]))])
+
+    @property
+    def etape_ended(self) -> bool:
+        """Whether the etape has ended."""
+        return len(self.camels_to_roll) == 0 or self.game_ended
+
+    @property
+    def game_ended(self) -> bool:
+        """Whether the game has ended."""
+        return any([len(field) > 0 for i, field in self.fields.items() if i > 16])
 
     def end_etape(self):
         """End the etape."""
