@@ -166,6 +166,8 @@ class Board:
             copy of the board
         """
         new_board = Board(list(self.player_banks.keys()), simulation)
+        new_board.etape = self.etape
+        new_board.etape_starter = self.etape_starter
         new_board.camels_to_roll = copy(self.camels_to_roll)
         new_board.stones = {i: copy(stone) for i, stone in self.stones.items()}
         new_board.camel_positions = copy(self.camel_positions)
@@ -177,6 +179,8 @@ class Board:
             new_board.player_banks = {player_name: copy(player_bank) for player_name, player_bank
                                       in self.player_banks.items()}
             new_board.player_camel_cards = copy(self.player_camel_cards)
+            new_board.player_etape_bets = {player_name: copy(player_bets) for player_name, player_bets
+                                           in self.player_etape_bets.items()}
         return new_board
 
     def __repr__(self):
