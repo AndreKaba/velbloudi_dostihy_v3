@@ -1,7 +1,7 @@
 """Module containing the definition of various moves."""
 from camelBetting.entities.board import Board, CAMELS
 from camelBetting.entities.stone import Stone
-from camelBetting.entities.bet import OverallBet
+from camelBetting.entities.bet import OverallBet, OVERALL_BET_VALUES
 
 
 from typing import Union, Dict, Tuple, List
@@ -234,7 +234,24 @@ class BetOverall(Move):
         return self.camel in self.board.player_camel_cards[self.player]
 
     def expected_value(self, outcomes: Dict[Tuple[str], int]) -> float:
-        return 0  # todo handle better
+        return self._min_expected_value(outcomes)
+
+    def _min_expected_value(self, outcomes: Dict[Tuple[str], int]) -> float:
+        """Minimal expected value for the move based on how many blind bets were placed on winner/loser."""
+        if self.winner:
+            bets_placed = len(self.board.winning_bets)
+            place = 0
+        else:
+            bets_placed = len(self.board.losing_bets)
+            place = -1
+        if bets_placed > len(OVERALL_BET_VALUES):
+            minimal_value = 1
+        else:
+            minimal_value = OVERALL_BET_VALUES[bets_placed]
+
+        overall = sum(outcomes.values())
+        placed = sum([value for outcome, value in outcomes.items() if outcome[place] == self.camel])
+        return (placed * minimal_value - (overall - placed) * 1) / overall
 
     def _realize_move(self) -> None:
         if not self.available:
