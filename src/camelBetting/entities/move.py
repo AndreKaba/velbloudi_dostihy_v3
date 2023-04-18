@@ -170,10 +170,13 @@ class StonePut(Move):
     def _realize_move(self) -> None:
         if not self.available:
             raise MoveNotAvailable()
+        index = None
         for i, stone_pos in self.board.stones.items():
             if stone_pos is not None and stone_pos.player == self.player:
-                self.board.stones.pop(i)
+                index = i
                 break
+        if index is not None:
+            self.board.stones.pop(index)
         self.board.stones[self.field_position] = Stone(self.player, self.positive)
 
     def __repr__(self):
