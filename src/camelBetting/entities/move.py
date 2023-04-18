@@ -206,7 +206,7 @@ class BetEtapeWinner(Move):
         first = sum([value for outcome, value in outcomes.items() if outcome[0] == self.camel])
         second = sum([value for outcome, value in outcomes.items() if outcome[1] == self.camel])
 
-        return (first * self.value + second) / overall
+        return (first * self.value + second * 1 - (overall - first - second) * 1) / overall
 
     def __repr__(self):
         return f'{self.player} bet on etape winner {self.camel.upper()} for {self.value}.'
