@@ -1,8 +1,14 @@
 """Module containing the definition of various moves."""
 from camelBetting.entities.board import Board
 from camelBetting.entities.stone import Stone
+from camelBetting.entities.bet import OverallBet
 
-from typing import Union
+from typing import Union, Dict, Tuple
+
+
+class MoveNotAvailable(Exception):
+    """Exception to raise when the move is not available."""
+    pass
 
 
 class Move:
@@ -18,7 +24,7 @@ class Move:
         self.board = board
         self.player = player
 
-    def expected_value(self) -> float:
+    def expected_value(self, outcomes: Dict[Tuple[str], int]) -> float:
         """Expected value of the move."""
         raise NotImplementedError()
 
@@ -73,10 +79,12 @@ class DiceRoll(Move):
     def available(self) -> bool:
         return self.camel in self.board.camels_to_roll
 
-    def expected_value(self) -> float:
+    def expected_value(self, outcomes: Dict[Tuple[str], int]) -> float:
         return 1
 
     def _realize_move(self) -> None:
+        if not self.available:
+            raise MoveNotAvailable()
         self.board.camels_to_roll.pop(self.board.camels_to_roll.index(self.camel))
         field, index = self.board.get_camel_position(self.camel)
         if field == 0:  # pop camel alone if camel is in the initial position
@@ -129,10 +137,12 @@ class StonePut(Move):
             self.field_position <= 16,
         ])
 
-    def expected_value(self) -> float:
+    def expected_value(self, outcomes: Dict[Tuple[str], int]) -> float:
         return 0
 
     def _realize_move(self) -> None:
+        if not self.available:
+            raise MoveNotAvailable()
         for i, stone_pos in self.board.stones.items():
             if stone_pos is not None and stone_pos.player == self.player:
                 self.board.stones[i] = None
@@ -143,4 +153,66 @@ class StonePut(Move):
         return f'{self.player} put stone on field {self.field_position} with value {"+1" if self.positive else "-1"}'
 
 
+class BetEtapeWinner(Move):
+
+    def __init__(self, board: Board, player: str, camel: str):
+        super().__init__(board, player)
+        self.camel = camel
+        if self.available:
+            self.value = self.board.available_etape_bets[self.camel][0].value
+        else:
+            self.value = 0
+
+    @property
+    def available(self) -> bool:
+        return len(self.board.available_etape_bets[self.camel]) > 0
+
+    def expected_value(self, outcomes: Dict[Tuple[str], int]) -> float:
+        if not self.available:
+            raise MoveNotAvailable()
+        overall = sum([value for value in outcomes.values()])
+        first = sum([value for outcome, value in outcomes.items() if outcome[0] == self.camel])
+        second = sum([value for outcome, value in outcomes.items() if outcome[1] == self.camel])
+
+        return (first * self.value + second) / overall
+
+    def __repr__(self):
+        return f'{self.player} bet on etape winner {self.camel.upper()} for {self.value}.'
+
+    def _realize_move(self) -> None:
+        if not self.available:
+            raise MoveNotAvailable()
+        bet = self.board.available_etape_bets[self.camel].pop(0)
+        self.board.player_etape_bets[self.player].append(bet)
+
+
+class BetOverall(Move):
+
+    def __init__(self, board: Board, player: str, camel: str, winner: bool):
+        super().__init__(board, player)
+        self.camel = camel
+        self.winner = winner
+
+    @property
+    def available(self) -> bool:
+        return self.camel in self.board.player_camel_cards[self.player]
+
+    def expected_value(self, outcomes: Dict[Tuple[str], int]) -> float:
+        return 0  # todo handle better
+
+    def _realize_move(self) -> None:
+        if not self.available:
+            raise MoveNotAvailable()
+        self.board.player_camel_cards[self.camel].pop(self.board.player_camel_cards[self.player].index(self.camel))
+        bet = OverallBet(self.camel, self.player)
+        if self.winner:
+            self.board.winning_bets.append(bet)
+        else:
+            self.board.losing_bets.append(bet)
+
+    def __repr__(self):
+        if self.winner:
+            return f'{self.player} bet on overall winner.'
+        else:
+            return f'{self.player} bet on overall loser.'
 
