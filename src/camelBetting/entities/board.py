@@ -73,3 +73,6 @@ class Board:
         new_board.player_banks = copy(self.player_banks)
         new_board.player_camel_cards = copy(self.player_camel_cards)
         return new_board
+
+    def __repr__(self):
+        return f'Current order: ({self.current_order})'

@@ -72,6 +72,9 @@ class DiceRoll(Move):
             else:
                 self.board.fields[new_field] += travelling_party
 
+    def __repr__(self):
+        return f'{self.player} rolled {self.dice} for {self.camel.upper()}'
+
 
 class StonePut(Move):
 
@@ -99,6 +102,9 @@ class StonePut(Move):
                 self.board.stones[i] = None
                 break
         self.board.stones[self.field_position] = Stone(self.player, self.positive)
+
+    def __repr__(self):
+        return f'{self.player} put stone on field {self.field_position} with value {"+1" if self.positive else "-1"}'
 
 
 
