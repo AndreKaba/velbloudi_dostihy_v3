@@ -3,7 +3,8 @@ import sys
 import resource
 
 from camelBetting.entities.board import Board
-from camelBetting.entities.move import simulation_moves, Move
+from camelBetting.entities.move import Move
+from camelBetting.entities.move_generators import simulation_moves
 from camelBetting.tools import block_stdout, enable_stdout
 
 from collections import defaultdict

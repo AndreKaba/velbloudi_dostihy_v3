@@ -1,7 +1,7 @@
 """Module containing the game logic - player turns, moves etc."""
 from camelBetting.entities.board import Board
 from camelBetting.entities.player import Player, EvilNpc, RandomNpc
-from camelBetting.entities.move import possible_game_moves
+from camelBetting.entities.move_generators import possible_game_moves
 
 from typing import Tuple, List, Dict, Generator
 
