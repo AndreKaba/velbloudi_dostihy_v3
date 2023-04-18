@@ -1,7 +1,8 @@
 """Module containing the definition of the Board class."""
-from camelBetting.entities.bet import EtapeBet
+from camelBetting.entities.bet import EtapeBet, OverallBet
+from camelBetting.entities.stone import Stone
 
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, Dict
 from copy import copy
 
 
@@ -19,19 +20,20 @@ class Board:
             player_names: list of player names
         """
         # init dice and etape bets
-        self.camels_to_roll = []  # list of camels that have not rolled yet
-        self.available_etape_bets = None  # available etape bets for each camel
+        self.camels_to_roll: List[str] = []  # list of camels that have not rolled yet
+        self.available_etape_bets: Dict[str, List[EtapeBet]] = {}  # available etape bets for each camel
         # init overall bets
-        self.winning_bets = []  # places overall winner bets
-        self.losing_bets = []  # places overall losing bets
+        self.winning_bets: List[OverallBet] = []  # places overall winner bets
+        self.losing_bets: List[OverallBet] = []  # places overall losing bets
         # init the field
-        self.stones = {i: None for i in range(1, 17)}
-        self.fields = {i: [] for i in range(1, 20)}
+        self.stones: Dict[int, Union[None, Stone]] = {i: None for i in range(1, 17)}
+        self.fields: Dict[int, List[str]] = {i: [] for i in range(1, 20)}
         self.fields[0] = [camel for camel in CAMELS]
         # init the player banks
-        self.player_banks = {player_name: 0 for player_name in player_names}
-        self.player_etape_bets = {player_name: [] for player_name in player_names}
-        self.player_camel_cards = {player_name: [camel for camel in CAMELS] for player_name in player_names}
+        self.player_banks: Dict[str, int] = {player_name: 0 for player_name in player_names}
+        self.player_etape_bets: Dict[str, List[EtapeBet]] = {player_name: [] for player_name in player_names}
+        self.player_camel_cards: Dict[str, List[str]] = \
+            {player_name: [camel for camel in CAMELS] for player_name in player_names}
 
         self.reset_etape()
 
