@@ -1,7 +1,8 @@
 """Module containing the definition of various moves."""
-from camelBetting.entities.board import Board
+from camelBetting.entities.board import Board, CAMELS
 from camelBetting.entities.stone import Stone
 from camelBetting.entities.bet import OverallBet
+
 
 from typing import Union, Dict, Tuple, List
 import random
@@ -101,26 +102,32 @@ class DiceRoll(Move):
         if not self.available:
             raise MoveNotAvailable()
         self.board.camels_to_roll.pop(self.board.camels_to_roll.index(self.camel))
-        field, index = self.board.get_camel_position(self.camel)
-        if field == 0:  # pop camel alone if camel is in the initial position
-            travelling_party = [self.board.fields[field].pop(index)]
-        else:  # take whole travelling party
-            travelling_party, self.board.fields[field] = \
-                self.board.fields[field][index:], self.board.fields[field][:index]
-
+        field, index = self.board.camel_positions[self.camel]
         new_field = field + self.dice
-        if self.board.stones[new_field] is None:
-            self.board.fields[new_field] += travelling_party
+        travelling_party = [(self.camel, field, index)]
+        if field != 0:
+            for camel in CAMELS:
+                if camel == self.camel:
+                    continue
+                f, i = self.board.camel_positions[camel]
+                if field == f and i > index:
+                    travelling_party.append((camel, f, i))
+            travelling_party.sort(key=lambda x: x[2])
+
+        if new_field not in self.board.stones:
+            on_top = True
         else:
             stone = self.board.stones[new_field]
             print(f'{stone.player}\'s stone was stepped on by {len(travelling_party)} camels.')
             self.board.player_banks[stone.player] += len(travelling_party)
             new_field = new_field + stone.value
             if stone.value < 0:
-                travelling_party = list(reversed(travelling_party))
-                self.board.fields[new_field] = [*travelling_party, *self.board.fields[new_field]]
+                on_top = False
             else:
-                self.board.fields[new_field] += travelling_party
+                on_top = True
+
+        for camel, _, _ in travelling_party:
+            self.board.move_camel(camel, new_field, on_top)
 
     def __repr__(self):
         return f'{self.player} rolled {self.dice} for {self.camel.upper()}'
@@ -150,12 +157,12 @@ class StonePut(Move):
 
     @property
     def available(self) -> bool:
-        return all([
-            self.board.stones[self.field_position] is None,
-            self.board.stones[self.field_position + 1] is None,
-            self.board.stones[self.field_position - 1] is None,
-            self.field_position > 1,
-            self.field_position <= 16,
+        return not any([
+            self.board.stones.get(self.field_position) is not None,
+            self.board.stones.get(self.field_position + 1) is not None,
+            self.board.stones.get(self.field_position - 1) is not None,
+            self.field_position <= 1,
+            self.field_position > 16
         ])
 
     def expected_value(self, outcomes: Dict[Tuple[str], int]) -> float:
@@ -166,7 +173,7 @@ class StonePut(Move):
             raise MoveNotAvailable()
         for i, stone_pos in self.board.stones.items():
             if stone_pos is not None and stone_pos.player == self.player:
-                self.board.stones[i] = None
+                self.board.stones.pop(i)
                 break
         self.board.stones[self.field_position] = Stone(self.player, self.positive)
 

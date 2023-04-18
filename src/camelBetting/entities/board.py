@@ -19,7 +19,7 @@ class Board:
             player_names: list of player names
         """
         self.etape = 0  # etape number
-        self.etape_starter = 0  # player who starts the etape
+        self.etape_starter = -1  # player who starts the etape
         # init dice and etape bets
         self.camels_to_roll: List[str] = []  # list of camels that have not rolled yet
         self.available_etape_bets: Dict[str, List[EtapeBet]] = {}  # available etape bets for each camel
@@ -27,16 +27,15 @@ class Board:
         self.winning_bets: List[OverallBet] = []  # places overall winner bets
         self.losing_bets: List[OverallBet] = []  # places overall losing bets
         # init the field
-        self.stones: Dict[int, Union[None, Stone]] = {i: None for i in range(1, 17)}
-        self.fields: Dict[int, List[str]] = {i: [] for i in range(1, 20)}
-        self.fields[0] = [camel for camel in CAMELS]
+        self.stones: Dict[int, Stone] = {}
+        self.camel_positions: Dict[str, Tuple[int, int]] = {camel: (0, 0) for camel in CAMELS}
         # init the player banks
         self.players = player_names
         self.player_banks: Dict[str, int] = {player_name: 0 for player_name in player_names}
         self.player_etape_bets: Dict[str, List[EtapeBet]] = {player_name: [] for player_name in player_names}
         self.player_camel_cards: Dict[str, List[str]] = \
             {player_name: [camel for camel in CAMELS] for player_name in player_names}
-        self._current_player_index = 0
+        self._current_player_index = -1
 
         self.reset_etape()
 
@@ -52,22 +51,44 @@ class Board:
     def next_player(self) -> None:
         """Move to the next player."""
         self._current_player_index += 1
-        self._current_player_index %= len(self.players)
+        if self._current_player_index >= len(self.players):
+            self._current_player_index = 0
 
-    def get_camel_position(self, camel: str) -> Tuple[int, int]:
-        """Return the position of a camel on the field.
+    def move_camel(self, camel: str, field: int, on_top: bool):
+        """Move a camel to a field.
 
         Args:
-            camel: camel to get position for
-
-        Returns:
-            tuple of (field number, index in the field - higher is better)
+            camel: camel to move
+            field: field to move to
+            on_top: whether to place the camel on top or bottom of the field
         """
-        for pos, field in self.fields.items():
-            field_camels = [x for x in field]
-            if camel in field_camels:
-                return pos, field_camels.index(camel)
-        raise ValueError('Camel not found on the field.')
+        self._remove_camel(camel)
+        self._place_camel(camel, field, on_top)
+
+    def _remove_camel(self, camel: str):
+        """Remove a camel from the field."""
+        field = self.camel_positions[camel][0]
+        self.camel_positions[camel] = (-1, -1)
+        if field == 0:
+            return
+        field_camels = [(camel, f, i) for camel, (f, i) in self.camel_positions.items() if f == field]
+        field_camels = sorted(field_camels, key=lambda x: x[2])
+        for new_i, (camel, f, i) in enumerate(field_camels):
+            self.camel_positions[camel] = (f, new_i)
+
+    def _place_camel(self, camel: str, field: int, on_top: bool):
+        """Place camel on top or bottom of field."""
+        camels_on_field = [(camel, f, i) for camel, (f, i) in self.camel_positions.items() if f == field]
+        if len(camels_on_field) == 0:
+            self.camel_positions[camel] = (field, 0)
+        if on_top:
+            maxim = max([x[2] for x in camels_on_field] + [-1])
+            self.camel_positions[camel] = (field, maxim + 1)
+        else:
+            camels_on_field.append((camel, field, -1))
+            camels_on_field = sorted(camels_on_field, key=lambda x: x[2])
+            for new_i, (camel, f, i) in enumerate(camels_on_field):
+                self.camel_positions[camel] = (f, new_i)
 
     @property
     def current_camel_order(self) -> Tuple[str]:
@@ -76,11 +97,9 @@ class Board:
         Returns:
             tuple of camel colors in the current order
         """
-        positions = []
-        for camel in CAMELS:
-            position = self.get_camel_position(camel)
-            positions.append((position[0], position[1], camel))
-        return tuple([x[2] for x in sorted(positions, key=lambda x: (-x[0], -x[1]))])
+        tmp = [(camel, f, i) for camel, (f, i) in self.camel_positions.items()]
+        tmp = sorted(tmp, key=lambda x: (-x[1], -x[2]))
+        return tuple([camel for (camel, f, i) in tmp])
 
     @property
     def current_player_order(self) -> Tuple[Tuple[str, int]]:
@@ -101,7 +120,7 @@ class Board:
     @property
     def game_ended(self) -> bool:
         """Whether the game has ended."""
-        return any([len(field) > 0 for i, field in self.fields.items() if i > 16])
+        return any([f > 16 for camel, (f, i) in self.camel_positions.items()])
 
     def reset_etape(self):
         """End the etape."""
@@ -117,7 +136,8 @@ class Board:
 
         self.etape += 1
         self.etape_starter += 1
-        self.etape_starter %= len(self.players)
+        if self.etape_starter >= len(self.players):
+            self.etape_starter = 0
         self._current_player_index = self.etape_starter
 
     def cash_is_overalls(self):
@@ -147,7 +167,8 @@ class Board:
         new_board = Board(list(self.player_banks.keys()))
         new_board.camels_to_roll = copy(self.camels_to_roll)
         new_board.stones = {i: copy(stone) for i, stone in self.stones.items()}
-        new_board.fields = {i: copy(field) for i, field in self.fields.items()}
+        new_board.camel_positions = copy(self.camel_positions)
+        new_board._current_player_index = self._current_player_index
         if not simulation:
             new_board.available_etape_bets = copy(self.available_etape_bets)
             new_board.winning_bets = copy(self.winning_bets)
