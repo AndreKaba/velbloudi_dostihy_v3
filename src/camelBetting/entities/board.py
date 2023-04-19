@@ -183,5 +183,20 @@ class Board:
                                            in self.player_etape_bets.items()}
         return new_board
 
+    def vizualize(self):
+        """Vizualize the board."""
+        for field_pos in range(17):
+            print(f'{field_pos}: '.ljust(5), end='|')
+            if field_pos in self.stones:
+                print(f'{self.stones[field_pos]}'.ljust(60), end='|')
+            else:
+                print(''.ljust(60), end='|')
+            camels = [(camel, f, i) for camel, (f, i) in self.camel_positions.items() if f == field_pos]
+            camels = sorted(camels, key=lambda x: x[2])
+            for camel, f, i in camels:
+                print(f'{camel} ({f}, {i})', end='')
+            print()
+
+
     def __repr__(self):
         return f'Current order: ({self.current_camel_order})'
