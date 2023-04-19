@@ -28,6 +28,45 @@ class Player:
         raise NotImplementedError()
 
 
+class HumanPlayer(Player):
+
+    def __init__(
+            self,
+            name: str,
+            random_rolls: bool = True,
+            show_evs: bool = False,
+            threshold_for_game_approx: int = 8,
+            game_approx_number: int = 5000,
+    ):
+        super().__init__(name)
+        self.random_rolls = random_rolls
+        self.show_evs = show_evs
+        self.threshold_for_game_approx = threshold_for_game_approx
+        self.game_approx_number = game_approx_number
+
+    def choose_move(self, moves: List[Move], board: Board) -> Move:
+        move_shortcuts = [move.shortcut for move in moves]
+        if self.show_evs:
+            camel_pos = [x[0] for x in board.camel_positions.values()]
+            sim = Simulation(board)
+            etape_outcomes = sim.simulate_etape()
+            move_evs = [(move, move.expected_value(etape_outcomes)) for move in moves
+                        if not isinstance(move, BetOverall)]
+            if max(camel_pos) >= self.threshold_for_game_approx:
+                game_outcomes = sim.approximate_game(self.game_approx_number)
+                move_evs += [(move, move.expected_value(game_outcomes)) for move in moves
+                             if isinstance(move, BetOverall)]
+            move_evs = list(sorted(move_evs, key=lambda x: x[1], reverse=True))
+            for move in move_evs[:5]:
+                print(f"{move[0]} ({move[0].shortcut}) ev: {move[1]:.2f}")
+        while True:
+            player_move = input('Your move: ')
+            if player_move in move_shortcuts:
+                return moves[move_shortcuts.index(player_move)]
+            else:
+                print('Unavailable move. Try again.')
+
+
 class BasicNpc(Player):
     """A player that chooses the highest EV value and places stones."""
 
