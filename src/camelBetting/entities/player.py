@@ -204,3 +204,11 @@ class LessRandomNpc(RandomNpc):
             if len(overall_moves) > 0:
                 preselected_moves.append(random.choice(overall_moves))
         return random.choice(preselected_moves)
+
+
+class RollerNpc(BasicNpc):
+
+    def choose_move(self, moves: List[Move], board: Board) -> Move:
+        rolling_moves = [move for move in moves if isinstance(move, DiceRoll)]
+        if len(rolling_moves) > 0:
+            return random.choice(rolling_moves)
