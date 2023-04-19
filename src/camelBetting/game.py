@@ -26,5 +26,7 @@ class Game:
             self.board = move.play()
             if self.board.etape_ended:
                 print("ETAPE ENDED")
+                print(self.board.current_camel_order)
                 self.board.reset_etape()
+                print(self.board.current_player_order)
                 print(f"NEXT ETAPE: {self.board.etape}")

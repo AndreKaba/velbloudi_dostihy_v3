@@ -99,6 +99,57 @@ class EvilNpc(BasicNpc):
         return move_evs[0][0]
 
 
+class AdequateNpc(BasicNpc):
+    """NPC that chooses one of the few highest EV value and places stones."""
+
+    def __init__(
+            self,
+            name: str,
+            threshold_for_overall_bets: int,
+            game_approx_number: int,
+            n_top_moves: int,
+    ):
+        """Evil NPC constructor.
+
+        Args:
+            name: name of the player
+            threshold_for_overall_bets: threshold for placing overall bets
+            game_approx_number: number of simulations for game approximation
+            n_top_moves: number of top moves to choose from randomly
+        """
+        super().__init__(name)
+        self.threshold_for_overall_bets = threshold_for_overall_bets
+        self.game_approx_number = game_approx_number
+        self.n_top_moves = n_top_moves
+
+    def choose_move(self, moves: List[Move], board: Board) -> Move:
+        """Chooses to place a stone or best EV move in current situation.
+
+        Args:
+            moves: possible moves
+            board: current board
+
+        Returns:
+            chosen move
+        """
+        camel_pos = [x[0] for x in board.camel_positions.values()]
+        stone_move = self._place_stone(moves, board, camel_pos)
+        if stone_move is not None:
+            return stone_move
+
+        sim = Simulation(board)
+        etape_outcomes = sim.simulate_etape()
+        move_evs = [(move, move.expected_value(etape_outcomes)) for move in moves
+                    if not isinstance(move, BetOverall)]
+        if max(camel_pos) >= self.threshold_for_overall_bets:
+            game_approx = sim.approximate_game(self.game_approx_number)
+            overall_evs = [(move, move.expected_value(game_approx)) for move in moves if isinstance(move, BetOverall)]
+            move_evs += overall_evs
+
+        move_evs = list(sorted(move_evs, key=lambda x: x[1], reverse=True))
+        return random.choice(move_evs[:self.n_top_moves])[0]
+
+
 class RandomNpc(BasicNpc):
     """NPC that chooses a random move apart from stone placing."""
 
@@ -149,6 +200,7 @@ class LessRandomNpc(RandomNpc):
             [move for move in moves if not isinstance(move, StonePut) and not isinstance(move, BetOverall)]
         ))  # append a normal move
         if max(camel_pos) > self.threshold_for_overall_bets:  # append an overall bet
-            preselected_moves.append(random.choice([move for move in moves if isinstance(move, BetOverall)]))
+            overall_moves = [move for move in moves if isinstance(move, BetOverall)]
+            if len(overall_moves) > 0:
+                preselected_moves.append(random.choice(overall_moves))
         return random.choice(preselected_moves)
-
