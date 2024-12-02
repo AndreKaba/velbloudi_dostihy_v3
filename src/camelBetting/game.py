@@ -1,6 +1,6 @@
 """Module containing the game logic - player turns, moves etc."""
 from camelBetting.entities.board import Board
-from camelBetting.entities.player import Player, EvilNpc, RandomNpc
+from camelBetting.entities.player import Player, EvilNpc, RandomNpc, HumanPlayer
 from camelBetting.entities.move_generators import possible_game_moves
 
 from typing import Tuple, List, Dict, Generator
@@ -21,6 +21,8 @@ class Game:
         while not self.board.game_ended:
             player = self.players[self.board.current_player]
             possible_moves = possible_game_moves(self.board, player.name)
+            if isinstance(player, HumanPlayer):
+                self.board.vizualize()
             move = player.choose_move(possible_moves, self.board)
             print(move)
             self.board = move.play()
